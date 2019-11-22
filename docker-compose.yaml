@@ -21,7 +21,6 @@ services:
     #
     # hostname: imannotate.docker
         
-
   database:
     image: mongo
     volumes:

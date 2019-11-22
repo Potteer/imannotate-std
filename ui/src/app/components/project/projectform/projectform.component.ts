@@ -34,6 +34,8 @@ export class ProjectformComponent implements OnInit {
   bucketList = new Array<Bucket>();
   s3Valid = true;
   s3Error = "";
+  scalityValid = true;
+  scalityError = "";
   projectWasSaved = false;
   badBannerType: boolean = null;
 
@@ -70,6 +72,9 @@ export class ProjectformComponent implements OnInit {
         });
         if (this.project.imageProvider == "s3") {
           this.checkS3Credentials();
+        }
+        if (this.project.imageProvider == "scality") {
+          this.checkScalityCredentials();
         }
 
         this._success.subscribe((message) => this.successMessage = message);
@@ -148,6 +153,10 @@ export class ProjectformComponent implements OnInit {
         this.project.imageProviderOptions = {};
         this.checkS3Credentials()
         break;
+      case 'scality':
+          this.project.imageProviderOptions = {};
+          this.checkScalityCredentials()
+          break;
     }
   }
 
@@ -160,6 +169,21 @@ export class ProjectformComponent implements OnInit {
       error => {
         this.s3Valid = false;
         this.s3Error = "Invalid S3 communication, maybe your AWS ID, Secret or Region is wrong.";
+        this.bucketList = new Array<Bucket>();
+      }
+    );
+  }
+//<!-- fabio -->
+  checkScalityCredentials() {
+    this.api.post('/v1/check/scality', this.project.imageProviderOptions).subscribe(
+      (resp: Array<Bucket>) => {
+        this.bucketList = resp;
+        this.scalityValid = true;
+        console.log("checkScalityCredentials %j", this.bucketList)
+      },
+      error => {
+        this.scalityValid = false;
+        this.scalityError = "Invalid Scality communication, maybe your Scality credentials are wrong.";
         this.bucketList = new Array<Bucket>();
       }
     );
@@ -198,6 +222,11 @@ export class ProjectformComponent implements OnInit {
     switch(this.project.imageProvider) {
       case 's3':
         if (!this.s3Valid) {
+          return false;
+        }
+        return true;
+      case 'scality':
+        if (!this.scalityValid) {
           return false;
         }
         return true;

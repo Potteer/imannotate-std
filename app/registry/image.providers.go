@@ -6,6 +6,7 @@ import (
 	"github.com/smileinnovation/imannotate/api/project"
 	"github.com/smileinnovation/imannotate/api/providers"
 	"github.com/smileinnovation/imannotate/app/providers/memorygc"
+	"github.com/smileinnovation/imannotate/app/providers/privates3store"
 	"github.com/smileinnovation/imannotate/app/providers/qwant"
 	"github.com/smileinnovation/imannotate/app/providers/s3store"
 )
@@ -41,6 +42,15 @@ func createImageProvider(prj *project.Project) {
 		imageProviders[prj.Id] = provider
 	case "s3":
 		provider := s3store.NewS3ImageProvider(opt["id"], opt["secret"], opt["region"], opt["bucket"], opt["prefix"])
+		imageProviders[prj.Id] = provider
+	case "scality":
+		log.Println("create image provider")
+		log.Println("id: " + string(opt["id"]))
+		log.Println("secret: " + string(opt["secret"]))
+		log.Println("server: " + string(opt["server"]))
+		log.Println("region: " + string(opt["region"]))
+		log.Println("bucket: " + string(opt["bucket"]))
+		provider := privates3store.NewS3ImageProvider(opt["server"], opt["id"], opt["secret"], opt["region"], opt["bucket"], opt["prefix"])
 		imageProviders[prj.Id] = provider
 	}
 }

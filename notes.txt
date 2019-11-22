@@ -1,0 +1,9 @@
+apt-get -f install s3fs -y
+
+echo "VL8XZ7C65RYY20SUO5VM:ih4K7jv+E+SaUqtuE8kH1KSa8sPzYmmHrH/4HiYy" > /etc/passwd-s3fs
+chmod 640 /etc/passwd-s3fs
+
+
+scality
+
+accessKey1:verySecretKey1

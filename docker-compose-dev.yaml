@@ -45,6 +45,24 @@ services:
       DB_NAME: imannotate
       DB_AUTH: admin
 
+    # S3 scality server
+    #image: scality/s3server
+    #image: zenko/cloudserver
+  scality:
+    image: minio/minio
+    ports:
+    - 9000:9000
+    hostname: s3server
+    environment:
+      MINIO_ACCESS_KEY: accessKey1
+      MINIO_SECRET_KEY: verySecretKey1
+      S3DATAPATH: /data/
+      S3METADATAPATH: /metadata/
+    command: server  /data
+    volumes:
+        - /tmp/s3data:/data
+        - /tmp/s3metadata:/metadata
+
   database:
     image: mongo
     volumes:

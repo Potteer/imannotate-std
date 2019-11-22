@@ -37,6 +37,7 @@
         <div class="form-group">
           <label for="imageProvider">Choose an image provider that will fetch image to annotate</label>
           <select (change)="onProviderChange()" name="imageProvider" class="form-control" [(ngModel)]="project.imageProvider">
+            <option value="scality">Scality</option>
             <option value="s3">Amazon S3</option>
             <option value="qwant">Qwant image search</option>
           </select>
@@ -68,6 +69,39 @@
           <input type="text" class="form-control" name="prefix" [(ngModel)]="project.imageProviderOptions.prefix"
             required />
         </div>
+
+        <!-- start scality -->
+        <div class="form-group" name="fs-options" *ngIf="project.imageProvider == 'scality'">
+          <label for="id">Your scality address</label>
+          <input type="text" class="form-control" name="server" [(ngModel)]="project.imageProviderOptions.server" (keyup)="checkScalityCredentials()"
+            required />
+
+          <label for="id">Your scality ID</label>
+          <input type="text" class="form-control" name="id" [(ngModel)]="project.imageProviderOptions.id" (keyup)="checkScalityCredentials()"
+            required />
+
+          <label for="secret">Scality Secret</label>
+          <input type="password" class="form-control" name="secret" [(ngModel)]="project.imageProviderOptions.secret"
+            (keyup)="checkScalityCredentials()" required />
+
+          <label for="region">Scality Region</label>
+          <input type="text" class="form-control" name="region" value="us-east-1" [(ngModel)]="project.imageProviderOptions.region"
+            (keyup)="checkScalityCredentials()" />
+
+          <div class="alert alert-danger" *ngIf="!scalityValid">
+            Scality authentication problem: {{ scalityError }}
+          </div>
+
+          <label for="bucket">Bucket name</label>
+          <select [(ngModel)]="project.imageProviderOptions.bucket" name="bucket" class="form-control">
+            <option *ngFor="let b of bucketList" value="{{b.Name}}" type="option">{{ b.Name }}</option>
+          </select>
+
+          <label for="prefix">Prefix in that bucket</label>
+          <input type="text" class="form-control" name="prefix" [(ngModel)]="project.imageProviderOptions.prefix"
+            required />
+        </div>
+        <!-- end scality -->
 
         <div class="form-group" name="qwant-options" *ngIf="project.imageProvider == 'qwant'">
           <label for="qwant-query">Qwant search query string</label>

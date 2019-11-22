@@ -42,6 +42,7 @@ func GetProject(c *gin.Context) {
 func NewProject(c *gin.Context) {
 	p := &project.Project{}
 	c.Bind(p)
+	log.Println("project.handler.go newproject p = %s", p)
 	if err := project.New(p); err != nil {
 		c.JSON(http.StatusBadRequest, err.Error())
 		return
@@ -53,6 +54,7 @@ func NewProject(c *gin.Context) {
 func UpdateProject(c *gin.Context) {
 	p := &project.Project{}
 	c.Bind(p)
+	log.Println("updateproject p = %s", p)
 	id := p.Id
 
 	registry.RemoveProvider(p)
@@ -64,12 +66,16 @@ func UpdateProject(c *gin.Context) {
 
 	// get updated project
 	p = project.Get(id)
+	log.Println("updateproject %s", p)
 	c.JSON(http.StatusOK, p)
 }
 
 func GetNextImage(c *gin.Context) {
+	log.Println("before get project")
 	p := project.Get(c.Param("name"))
+	log.Println("after get project")
 	name, image, _ := project.NextImage(p)
+	log.Println("name = %v image = %v", name, image)
 
 	c.JSON(http.StatusOK, map[string]string{
 		"name": name,

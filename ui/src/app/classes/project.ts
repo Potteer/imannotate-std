@@ -1,4 +1,5 @@
 export class Project {
+  server: string;
   id: string;
   name: string;
   banner: string;
@@ -9,6 +10,7 @@ export class Project {
   imageProviderOptions: any;
 
   constructor() {
+    this.server = "";
     this.id = "";
     this.name = "";
     this.owner = "";

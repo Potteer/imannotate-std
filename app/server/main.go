@@ -54,6 +54,10 @@ func AnnotationProtection(c *gin.Context) {
 	prj := project.Get(prjname)
 	u := auth.GetCurrentUser(c.Request)
 
+	canAnnotate := project.CanAnnotate(u, prj)
+	isAdmin := admin.Get().IsAdmin(u)
+	log.Println("canAnnotate: %v", canAnnotate)
+	log.Println("isAdmin: %v", isAdmin)
 	if project.CanAnnotate(u, prj) || admin.Get().IsAdmin(u) {
 		return
 	}
@@ -128,6 +132,7 @@ func GetServer() *gin.Engine {
 		v1.DELETE("/admin/user/:name", Auth, Admin, handlers.RemoveAdmin)
 
 		v1.POST("/check/s3", Auth, handlers.CheckS3Credentials)
+		v1.POST("/check/scality", Auth, handlers.CheckScalityCredentials)
 
 		v1.HEAD("/isadmin", Auth, Admin)
 		v1.GET("/avatar/:name", Gravatar)

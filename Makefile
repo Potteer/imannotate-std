@@ -30,12 +30,12 @@ enter-ui:
 
 containers/prod/ui:
 	$(CC) $(DEVDC) run --rm ui ng build --prod
-	mv ui/dist containers/prod/ui
+	cp -vRp ui/dist containers/prod/ui
 
 containers/prod/app:
 	echo 'go build -ldflags "-linkmode external -extldflags -static" -o app.bin' > app/builder.sh
 	$(CC) $(DEVDC) run --rm api sh ./builder.sh
-	mv app/app.bin containers/prod/app
+	cp -vRp app/app.bin containers/prod/app
 	rm app/builder.sh
 
 
