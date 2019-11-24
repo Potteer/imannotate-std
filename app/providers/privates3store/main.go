@@ -82,18 +82,17 @@ func (sss *PrivateS3ImageProvider) GetImage() (string, string, error) {
 		log.Println("GetImage a")
 		// copy stream
 		im, _, err := image.Decode(i.Reader)
-		log.Println("GetImage b")
+		log.Println("GetImage b", im)
 		if err != nil {
 			log.Println(err)
 		}
-		var buff bytes.Buffer
-		log.Println("GetImage c")
-
-		if &buff == nil {
+		if im == nil {
 			return "", "", errors.New("No new file")
 		}
-		err = png.Encode(&buff, im)
-		if err != nil {
+		var buff bytes.Buffer
+		log.Println("GetImage c", buff)
+
+		if err := png.Encode(&buff, im); err != nil {
 			log.Println("err = ", err)
 			return "", "", errors.New("No new file")
 		}
