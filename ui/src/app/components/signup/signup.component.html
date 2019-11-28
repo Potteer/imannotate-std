@@ -20,7 +20,7 @@
             pattern="[a-zA-Z0-9_\s\-]{3,}"
             required />
           <i class="material-icons float-right" ngbTooltip="Your username should contains at least 3 charaters and only letters, numbers, space, dash and underscore are allowed" placement="right">info</i>
-          <div *ngIf="userExists" class="alert alert-danger">User {{ user.username }} already exists</div>
+          <div style="margin-top: 10px;" *ngIf="userExists" class="alert alert-danger">User {{ user.username }} already exists</div>
 
         </div>
         <div class="form-group">
@@ -46,9 +46,9 @@
           <i class="material-icons float-right" ngbTooltip="Password must contains at least 6 charaters" placement="right">info</i>
         </div>
           <a routerLink="/signin" class="btn btn-info">Back</a>
-          <button type="submit" class="btn btn-success" [disabled]="f.status=='INVALID' || userExists">Signup</button>
+          <button style="margin-left: 10px;"type="submit" class="btn btn-success" [disabled]="f.status=='INVALID' || userExists">Signup</button>
       </form>
-      <div class="alert alert-success" *ngIf="registered">You've been registered ! You can now <a routerLink="/signin">signin</a>.</div>
+      <div class="alert alert-success" *ngIf="registered">You've been registered ! You can now <a routerLink="/signin">signin here</a>.</div>
     </div>
   </div>
 </div>

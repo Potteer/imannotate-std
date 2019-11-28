@@ -24,9 +24,12 @@
           <label for="name">Password - leave blank to not change the current one</label>
           <input type="password" name="password" [(ngModel)]="user.password" class="form-control" />
         </div>
+        <div class="row justify-content-md-center text-center">
         <button type="submit" class="btn btn-success">Save</button>
+        </div>
       </form>
-      <div>
+
+      <div><br>
         <p>You may choose a theme</p>
         <select class="form-control" [(ngModel)]="chosenTheme" (change)="themeChosen()">
           <option value="">Default</option>
