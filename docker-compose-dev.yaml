@@ -23,8 +23,8 @@ services:
   api:
     build: containers/api
     volumes:
-        - ./app:/go/src/github.com/smileinnovation/imannotate/app:Z
-        - ./api:/go/src/github.com/smileinnovation/imannotate/api:Z
+       - ./app:/go/src/github.com/smileinnovation/imannotate/app:Z
+       - ./api:/go/src/github.com/smileinnovation/imannotate/api:Z
 
     user: ${_UID?
                 You must provide a _UID environment variable containing

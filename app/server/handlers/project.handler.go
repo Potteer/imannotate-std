@@ -75,7 +75,8 @@ func GetNextImage(c *gin.Context) {
 	p := project.Get(c.Param("name"))
 	log.Println("after get project")
 	name, image, _ := project.NextImage(p)
-	log.Println("name = %v image = %v", name, image)
+	//log.Println("name = %v image = %v", name, image)
+	log.Printf("name = %v", name)
 
 	c.JSON(http.StatusOK, map[string]string{
 		"name": name,

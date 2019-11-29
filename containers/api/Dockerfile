@@ -5,6 +5,7 @@ RUN set -xe; \
     go get -v github.com/codegangsta/gin; \
     go get -v github.com/Masterminds/glide
 
+
 RUN set -xe;\
     addgroup -g 1000 gouser; \
     adduser -u 1000 -G gouser -D gouser
