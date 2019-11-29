@@ -28,6 +28,7 @@ import { AdminUserComponent } from '@app/components/admin/admin-user/admin-user.
 import { UserComponent } from '@app/components/user/user.component';
 import { TruncatePipe } from '@app/pipe/truncate.pipe';
 import { HammerConfig } from '@app/classes/hammer-config';
+import { CarouselComponent } from '@app/components/carousel/carousel.component';
 
 @NgModule({
   declarations: [
@@ -45,6 +46,7 @@ import { HammerConfig } from '@app/classes/hammer-config';
     AdminProjectComponent,
     AdminUserComponent,
     UserComponent,
+    CarouselComponent,
     TruncatePipe,
   ],
   imports: [
