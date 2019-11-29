@@ -89,9 +89,11 @@
           <input type="text" class="form-control" name="region" value="us-east-1" [(ngModel)]="project.imageProviderOptions.region" 
           />
 
+          <div>
           <button type="button" class="btn-success" (click)="checkScalityCredentials()">Check Credentials</button>
+          </div>
 
-          <div class="alert alert-danger" *ngIf="!scalityValid">
+          <div class="alert alert-danger" *ngIf="!scalityValid && project.imageProvider != ''">
             Authentication problem: {{ scalityError }}
           </div>
 

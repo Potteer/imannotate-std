@@ -155,7 +155,7 @@ export class ProjectformComponent implements OnInit {
         break;
       case 'scality':
           this.project.imageProviderOptions = {};
-          this.checkScalityCredentials()
+          //this.checkScalityCredentials()
           break;
     }
   }
