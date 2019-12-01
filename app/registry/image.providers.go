@@ -2,6 +2,7 @@ package registry
 
 import (
 	"log"
+	"fmt"
 
 	"github.com/smileinnovation/imannotate/api/project"
 	"github.com/smileinnovation/imannotate/api/providers"
@@ -14,10 +15,13 @@ import (
 var imageProviders = make(map[string]providers.ImageProvider)
 
 func GetProvider(prj *project.Project) providers.ImageProvider {
+	fmt.Println("getprovider")
+
 	if prj.ImageProvider == "" {
 		log.Println("No image provider defined")
 		return nil
 	}
+	fmt.Println("ip", imageProviders[prj.Id])
 	if p, ok := imageProviders[prj.Id]; !ok {
 		createImageProvider(prj)
 		return GetProvider(prj)
@@ -25,6 +29,7 @@ func GetProvider(prj *project.Project) providers.ImageProvider {
 		gc := memorygc.NewMemoryGC()
 		gc.SetImageProvider(p)
 		SetGC(prj, gc)
+		fmt.Println("return p")
 		return p
 	}
 }

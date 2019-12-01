@@ -11,11 +11,10 @@ import (
 	"log"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/smileinnovation/imannotate/app/providers/privates3store/s3utils"
 )
-
-//"image/jpeg"
 
 type s3res struct {
 	Name   string
@@ -36,17 +35,20 @@ type PrivateS3ImageProvider struct {
 //NewS3ImageProvider from privateS3store provider a ImageProvider from private s3 such as Scality or MinIO
 func NewS3ImageProvider(server, id, secret, region, bucket, prefix string) *PrivateS3ImageProvider {
 
-	log.Println("privates3store news3imageprovider")
-	log.Println("id::" + string(id))
-	log.Println("secret: " + string(secret))
-	log.Println("server: " + string(server))
-	log.Println("region: " + string(region))
-	log.Println("bucket: " + string(bucket))
-
-	conn, err := s3utils.GetS3Service(server, region, id, secret)
-	if err != nil {
-		log.Println("PrivateS3Store: ", err)
+	c := &aws.Config{
+		Credentials:      credentials.NewStaticCredentials(id, secret, ""),
+		Endpoint:         aws.String(server),
+		Region:           aws.String(region),
+		DisableSSL:       aws.Bool(true),
+		S3ForcePathStyle: aws.Bool(true),
 	}
+
+	sess, err := session.NewSession(c)
+	if err != nil {
+		log.Println(err)
+	}
+
+	svc := s3.New(sess)
 
 	sss := &PrivateS3ImageProvider{
 		id:     id,
@@ -57,56 +59,52 @@ func NewS3ImageProvider(server, id, secret, region, bucket, prefix string) *Priv
 		prefix: prefix,
 		hit:    make(chan *s3res),
 	}
-	go sss.fetch(&conn)
+	go sss.fetch(svc)
 	return sss
 }
 
-///*
-////GetImage returns a Image from Private S3 store
-//func (sss *PrivateS3ImageProvider) GetImage() (string, string, error) {
-//	log.Println("start GetImage")
-//	im, err := <-sss.hit
-//	if err != nil {
-//		log.Println(err)
-//	}
-//	if im == nil {
-//		return "", "", errors.New("No new file")
-//	}
-//	buf := make([]byte, 4)
-//	im.Reader.Read(buf)
-//	return im.Name, buf, nil
-//
-//	//log.Println("getimage i ", i)
-//	//log.Println("getimage ok ", ok)
-//	//was working down
-//	/*
-//		if i, ok := <-sss.hit; ok {
-//			// copy stream
-//			im, _, err := image.Decode(i.Reader)
-//			if err != nil {
-//				log.Println(err)
-//			}
-//			if im == nil {
-//				return "", "", errors.New("No new file")
-//			}
-//			var buff bytes.Buffer
-//
-//			if err := png.Encode(&buff, im); err != nil {
-//				log.Println("err = ", err)
-//				return "", "", errors.New("No new file")
-//			}
-//			return i.Name, "data:image/png;base64," + base64.StdEncoding.EncodeToString(buff.Bytes()), nil
-//		}
-//	*/
-//	return "", "", errors.New("No new file")
-//}
+/*
+//GetImage returns a Image from Private S3 store
 func (sss *PrivateS3ImageProvider) GetImage() (string, string, error) {
+
 	if i, ok := <-sss.hit; ok {
 		// copy stream
-		fmt.Println(i.Name)
 		im, _, err := image.Decode(i.Reader)
 		if err != nil {
 			log.Println(err)
+		}
+		if im == nil {
+			return "", "", errors.New("No new file")
+		}
+		var buff bytes.Buffer
+
+		if err := png.Encode(&buff, im); err != nil {
+			log.Println("err = ", err)
+			return "", "", errors.New("No new file")
+		}
+		// todo fabio here
+		// need check jpeg and return jpeg/base64
+		// and other types of formats
+		return i.Name, "data:image/png;base64," + base64.StdEncoding.EncodeToString(buff.Bytes()), nil
+	}
+	return "", "", errors.New("No new file")
+}
+*/
+
+func (sss *PrivateS3ImageProvider) GetImage() (string, string, error) {
+	if i, ok := <-sss.hit; ok {
+		// copy stream
+		fmt.Println("GetImage 2 ", i.Name)
+		if len(i.Name) == 0 {
+			return "", "", errors.New("No new file 2")
+		}
+		//fabio
+		im, _, err := image.Decode(i.Reader)
+		if err != nil {
+			log.Println(err)
+		}
+		if im == nil {
+			return "", "", errors.New("No new file")
 		}
 		var buff bytes.Buffer
 
@@ -117,13 +115,13 @@ func (sss *PrivateS3ImageProvider) GetImage() (string, string, error) {
 }
 
 // AddImage puts an image to private s3 store
-func (sss *PrivateS3ImageProvider) AddImage(name string, url string) {
+func (sss *PrivateS3ImageProvider) AddImage(name, url string) {
+	fmt.Println("addimage name", name)
+
 	var b []byte
 
 	buff := bytes.NewBuffer(b)
 	buff.WriteString(url)
-
-	fmt.Println("fabio: ", "url ", url)
 
 	sss.hit <- &s3res{
 		Name:   name,
@@ -131,31 +129,29 @@ func (sss *PrivateS3ImageProvider) AddImage(name string, url string) {
 	}
 }
 
-func (sss *PrivateS3ImageProvider) fetch(conn *s3utils.S3Connector) {
+func (sss *PrivateS3ImageProvider) fetch(svc *s3.S3) {
 	buck := &s3.ListObjectsV2Input{}
 	buck.SetBucket(sss.bucket)
 	buck.SetPrefix(sss.prefix + "/")
 	buck.SetDelimiter("/")
 
-	sss.listThat(conn, buck)
+	sss.listThat(svc, buck)
 }
 
-func (sss *PrivateS3ImageProvider) listThat(conn *s3utils.S3Connector, buck *s3.ListObjectsV2Input) {
+func (sss *PrivateS3ImageProvider) listThat(svc *s3.S3, buck *s3.ListObjectsV2Input) {
 	//func (sss *PrivateS3ImageProvider) listThat(svc *s3.S3, buck *s3.ListObjectsInput) {
 	prefixes := []string{}
-	log.Println("privates3imageprovider listThat")
 	walkFn := func(page *s3.ListObjectsV2Output, lastPage bool) bool {
 		for _, obj := range page.Contents {
 			if obj.Key == nil {
 				continue
 			}
-			fmt.Println("key:", *obj.Key)
 
 			in := s3.GetObjectInput{
 				Bucket: buck.Bucket,
 				Key:    obj.Key,
 			}
-			res, err := conn.Svc.GetObject(&in)
+			res, err := svc.GetObject(&in)
 			if err != nil {
 				log.Println("Private S3 ERR 1", err)
 				continue
@@ -176,15 +172,14 @@ func (sss *PrivateS3ImageProvider) listThat(conn *s3utils.S3Connector, buck *s3.
 		MaxKeys: aws.Int64(10),
 		Bucket:  buck.Bucket,
 	}
-	conn.Svc.ListObjectsV2Pages(listObjectsInput, walkFn)
+	svc.ListObjectsV2Pages(listObjectsInput, walkFn)
 	for _, p := range prefixes {
 		b := &s3.ListObjectsV2Input{}
 		b.SetBucket(*buck.Bucket)
 		b.SetPrefix(p)
 		b.SetDelimiter("/")
-		sss.listThat(conn, b)
+		sss.listThat(svc, b)
 	}
-
 	/*
 		prefixes := []string{}
 		page := 0
