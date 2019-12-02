@@ -86,7 +86,7 @@
             required />
 
           <label for="region">Region</label>
-          <input type="text" class="form-control" name="region" value="us-east-1" [(ngModel)]="project.imageProviderOptions.region" 
+          <input type="text" class="form-control" name="region" required [(ngModel)]="project.imageProviderOptions.region" 
           />
 
           <div>
@@ -99,12 +99,12 @@
           </div>
 
           <label for="bucket">Bucket name</label>
-          <select [(ngModel)]="project.imageProviderOptions.bucket" name="bucket" class="form-control"  required>
+          <select [(ngModel)]="project.imageProviderOptions.bucket" name="bucket" class="form-control" required>
             <option *ngFor="let b of bucketList" value="{{b.Name}}" type="option">{{ b.Name }}</option>
           </select>
 
           <label for="prefix">Prefix in that bucket</label>
-          <input type="text" class="form-control" name="prefix" [(ngModel)]="project.imageProviderOptions.prefix"
+          <input type="text" class="form-control" name="prefix" required [(ngModel)]="project.imageProviderOptions.prefix"
           />
         </div>
         <!-- end scality -->

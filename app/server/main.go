@@ -54,10 +54,6 @@ func AnnotationProtection(c *gin.Context) {
 	prj := project.Get(prjname)
 	u := auth.GetCurrentUser(c.Request)
 
-	canAnnotate := project.CanAnnotate(u, prj)
-	isAdmin := admin.Get().IsAdmin(u)
-	log.Println("canAnnotate: %v", canAnnotate)
-	log.Println("isAdmin: %v", isAdmin)
 	if project.CanAnnotate(u, prj) || admin.Get().IsAdmin(u) {
 		return
 	}

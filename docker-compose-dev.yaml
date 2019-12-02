@@ -58,7 +58,7 @@ services:
       MINIO_SECRET_KEY: verySecretKey1
       S3DATAPATH: /data/
       S3METADATAPATH: /metadata/
-    command: server  /data
+    command: server /data
     volumes:
         - /tmp/s3data:/data
         - /tmp/s3metadata:/metadata
