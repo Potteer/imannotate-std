@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/base64"
 	"errors"
+	"fmt"
 	"image"
 	_ "image/jpeg"
 	"image/png"
@@ -21,6 +22,8 @@ type s3res struct {
 	Name   string
 	Reader io.Reader
 }
+
+const requiredSamples int = 3
 
 type PrivateS3ImageProvider struct {
 	bucket string
@@ -59,6 +62,7 @@ func NewS3ImageProvider(server, id, secret, region, bucket, prefix string) *Priv
 	}
 
 	go sss.fetch(svc)
+	sss.fetchBranches(svc)
 	return sss
 }
 
@@ -96,15 +100,59 @@ func (sss *PrivateS3ImageProvider) fetch(svc *s3.S3) {
 	buck.SetPrefix(sss.prefix + "/")
 	buck.SetDelimiter("/")
 
-	sss.listThat(svc, buck)
+	sss.listThat(svc, buck, requiredSamples)
 }
 
-func (sss *PrivateS3ImageProvider) listThat(svc *s3.S3, buck *s3.ListObjectsV2Input) {
+func (sss *PrivateS3ImageProvider) fetchBranches(svc *s3.S3) {
+	buck := &s3.ListObjectsV2Input{}
+	buck.SetBucket(sss.bucket)
+	buck.SetPrefix("/")
+	buck.SetDelimiter("")
+
+	sss.findLastBranch(svc, buck)
+}
+
+func (sss *PrivateS3ImageProvider) findLastBranch(svc *s3.S3, buck *s3.ListObjectsV2Input) {
+	p := "/"
+	b := &s3.ListObjectsV2Input{}
+	b.SetBucket(*buck.Bucket)
+	b.SetPrefix(p)
+	//b.SetDelimiter("/")
+
+	page := 0
+	err := svc.ListObjectsV2Pages(b, func(p *s3.ListObjectsV2Output, lastPage bool) bool {
+		page++
+		for _, cc := range p.Contents {
+			fmt.Println("CC => ", *cc.Key)
+
+			in := s3.GetObjectInput{
+				Bucket: buck.Bucket,
+				Key:    cc.Key,
+			}
+			res, err := svc.GetObject(&in)
+			fmt.Println("res=>", res)
+			if err != nil {
+				return false
+			}
+		}
+		return true
+	})
+	if err != nil {
+		fmt.Println("err=>", err)
+
+	}
+}
+
+func (sss *PrivateS3ImageProvider) listThat(svc *s3.S3, buck *s3.ListObjectsV2Input, qtt int) {
+	//fabio
+	//count := 0
+
 	prefixes := []string{}
 	page := 0
 	err := svc.ListObjectsV2Pages(buck, func(p *s3.ListObjectsV2Output, lastPage bool) bool {
 		page++
 		for _, cc := range p.Contents {
+			fmt.Println("CC => ", cc.Key)
 			isImage := false
 			for _, ext := range []string{".jpg", ".jpeg", ".png"} {
 				k := strings.ToLower(*cc.Key)
@@ -112,6 +160,7 @@ func (sss *PrivateS3ImageProvider) listThat(svc *s3.S3, buck *s3.ListObjectsV2In
 					isImage = true
 				}
 			}
+
 			if !isImage {
 				continue
 			}
@@ -150,6 +199,6 @@ func (sss *PrivateS3ImageProvider) listThat(svc *s3.S3, buck *s3.ListObjectsV2In
 		b.SetBucket(*buck.Bucket)
 		b.SetPrefix(p)
 		b.SetDelimiter("/")
-		sss.listThat(svc, b)
+		sss.listThat(svc, b, requiredSamples)
 	}
 }
