@@ -144,15 +144,11 @@ func (mpp *MongoProjectProvider) Update(p *project.Project) error {
 }
 
 func (mpp *MongoProjectProvider) NextImage(prj *project.Project) (string, string, error) {
-	log.Println("before registry.GetProvider")
 	provider := registry.GetProvider(prj)
-	log.Println("after registry.GetProvider")
 	if provider == nil {
 		return "", "", errors.New("No image provider given for the project named " + prj.Name)
 	}
-	log.Println("before GetImage")
 	name, url, err := provider.GetImage()
-	log.Println("after GetImage")
 
 	// check if image already annotated
 	if ann, err := annotation.GetImage(prj, name); err == nil && ann != nil {

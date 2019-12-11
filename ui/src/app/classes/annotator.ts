@@ -42,16 +42,7 @@ export class Annotator {
     this.drawBoundingBoxes();
   }
 
-  loadImage(url) {
-    const image = new Image();
-    image.addEventListener('load', () => {
-      this.createCanvas();
-      this.reset();
-      this.rescaleCanvas();
-    });
-    image.src = url;
-    this.image = image;
-  }
+
 
 
   // rescale the canvas is needed
@@ -129,11 +120,7 @@ export class Annotator {
 
 
           const toAlpha = [];
-          this.boxesList.forEach(elem => {
-            if (this.ctx.isPointInPath(elem.path, ecx - rect.left, ecy - rect.top)) {
-              toAlpha.push(elem);
-            }
-          });
+          
 
           if (!this.boxInProgress) {
             Array.from(document.querySelectorAll('.annotate-controls')).forEach(
@@ -161,13 +148,7 @@ export class Annotator {
         this.drawBoundingBoxes();
 
         // draw current boxes
-        this.drawRect(
-          x,
-          y,
-          (ecx - rect.left - x),
-          (ecy - rect.top - y),
-          null
-        );
+        this.drawRect(0,0,0,0,'red');
       });
     });
 
@@ -246,7 +227,7 @@ export class Annotator {
   writeText(box) {
     this.ctx.font = '16px Arial';
     this.ctx.beginPath();
-    this.ctx.fillStyle = box.color;
+    this.ctx.fillStyle = 'black';
 
     const textSize = this.ctx.measureText(box.label);
     let textBoxY = (box.y * this.canvas.clientHeight) - 25;
@@ -284,15 +265,8 @@ export class Annotator {
     // tslint:disable-next-line:no-unused-expression
     this.ctx.drawImage(this.image, 0, 0, this.canvas.width, this.canvas.height);
     this.boxesList.forEach(box => {
-      const path = this.drawRect(
-        box.x * this.canvas.clientWidth,
-        box.y * this.canvas.clientHeight,
-        (box.width - box.x) * this.canvas.clientWidth,
-        (box.height - box.y) * this.canvas.clientHeight,
-        box.color);
-      box.path = path;
+      const path = this.drawRect(0,0,0,0,'red');
       this.writeText(box);
-      this.drawControls(box);
     });
   }
 
@@ -300,7 +274,7 @@ export class Annotator {
   // so we will store path in box element
   drawRect(x, y, w, h, color): Path2D {
     if (!color) {
-      color = 'red';
+      color = 'black';
     }
 
     const path = new Path2D();
@@ -332,35 +306,7 @@ export class Annotator {
       boxes: boxes,
     });
   }
-
-  // draw button to delete current box
-  drawControls(box: BoundingBox) {
-    const old: HTMLDivElement = document.querySelector('#' + box.id);
-    if (old) { return; }
-
-    const removeButton = document.createElement('button');
-    removeButton.classList.add('btn', 'btn-danger');
-    removeButton.innerHTML = '<i class="material-icons">delete</i>';
-    removeButton.addEventListener('click', (evt) => {
-      this.removeBoxSubject.next(box);
-      removeButton.remove();
-    });
-
-    const elem = document.createElement('div');
-    elem.id = box.id;
-    elem.appendChild(removeButton);
-    elem.classList.add('annotate-controls');
-
-    // always display controls for mobile - because "hover" is not available
-    if (this.isMobile) {
-      elem.classList.add('visible');
-      elem.classList.add('mobile');
-    }
-    elem.style.top = (box.y * 100).toString() + '%';
-    elem.style.left = (box.x * 100).toString() + '%';
-    this.element.appendChild(elem);
-  }
-
+  
   reset() {
     this.boxesList = [];
     this.clearCanvas();

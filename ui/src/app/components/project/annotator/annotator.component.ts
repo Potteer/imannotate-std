@@ -20,6 +20,7 @@ export class AnnotatorComponent implements OnInit {
   boxes = new Array<BoundingBox>();
   project = new Project();
   image: ImageResult ;
+  idnumber: number;
 
   constructor(
     private route: ActivatedRoute,
@@ -53,19 +54,30 @@ export class AnnotatorComponent implements OnInit {
 
   setLabel(label: string) {
     if (!this.currentBox) { return; }
-    if ((this.currentBox.width - this.currentBox.x) * this.annotator.canvas.clientWidth < 20 ||
-        (this.currentBox.height - this.currentBox.y) * this.annotator.canvas.clientHeight < 20
+    if ((this.currentBox.width - this.currentBox.x) * this.annotator.canvas.clientWidth < 0.1 ||
+        (this.currentBox.height - this.currentBox.y) * this.annotator.canvas.clientHeight < 0.1
     ) {
       alert("Box too small !")
       return
     }
 
+    this.currentBox.x = 0;
+    this.currentBox.y= 0;
+    this.currentBox.width = 0;
+    this.currentBox.height = 0;
+    this.currentBox.color = 'red';
+    this.currentBox.id = 'label-' + Math.floor(Math.random() * 99999999).toString();;
+    this.currentBox.old_color = null;
+    this.currentBox.textColor = 'white';
+    this.currentBox.hasAlpha = false;
+
     this.currentBox.label = label;
     this.boxes.push(this.currentBox);
+    console.log("boxes após setLabel: ",this.boxes)
     this.annotator.setBoundingBoxes(this.boxes);
+    console.log("annotator após setLabel: ",this.annotator)
     this.currentBox = null;
   }
-
 
   saveAnnotation() {
     console.log(this.boxes);

@@ -6,9 +6,11 @@ import (
 	"errors"
 	"fmt"
 	"image"
+	_ "image/jpeg"
 	"image/png"
 	"io"
 	"log"
+	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -21,7 +23,8 @@ type s3res struct {
 	Reader io.Reader
 }
 
-//PrivateS3ImageProvider has a field for server as S3ImageProvider does not
+const requiredSamples int = 3
+
 type PrivateS3ImageProvider struct {
 	bucket string
 	prefix string
@@ -32,15 +35,7 @@ type PrivateS3ImageProvider struct {
 	hit    chan *s3res
 }
 
-//NewS3ImageProvider from privateS3store provider a ImageProvider from private s3 such as Scality or MinIO
 func NewS3ImageProvider(server, id, secret, region, bucket, prefix string) *PrivateS3ImageProvider {
-
-	log.Println("privates3store news3imageprovider")
-	log.Println("id: " + string(id))
-	log.Println("secret: " + string(secret))
-	log.Println("server: " + string(server))
-	log.Println("region: " + string(region))
-	log.Println("bucket: " + string(bucket))
 
 	c := &aws.Config{
 		Credentials:      credentials.NewStaticCredentials(id, secret, ""),
@@ -54,8 +49,7 @@ func NewS3ImageProvider(server, id, secret, region, bucket, prefix string) *Priv
 	if err != nil {
 		log.Println(err)
 	}
-
-	svc := s3.New(sess)
+	svc := s3.New(sess, aws.NewConfig().WithRegion(region))
 
 	sss := &PrivateS3ImageProvider{
 		id:     id,
@@ -66,43 +60,28 @@ func NewS3ImageProvider(server, id, secret, region, bucket, prefix string) *Priv
 		prefix: prefix,
 		hit:    make(chan *s3res),
 	}
+
 	go sss.fetch(svc)
+	sss.fetchBranches(svc)
 	return sss
 }
 
-//GetImage returns a Image from Private S3 store
 func (sss *PrivateS3ImageProvider) GetImage() (string, string, error) {
-	log.Println("start GetImage")
-	/*
-		i, ok := <-sss.hit
-		log.Println("getimage i ", i)
-		log.Println("getimage ok ", ok)
-	*/
+
 	if i, ok := <-sss.hit; ok {
-		log.Println("GetImage a")
 		// copy stream
 		im, _, err := image.Decode(i.Reader)
-		log.Println("GetImage b", im)
 		if err != nil {
 			log.Println(err)
 		}
-		if im == nil {
-			return "", "", errors.New("No new file")
-		}
 		var buff bytes.Buffer
-		log.Println("GetImage c", buff)
 
-		if err := png.Encode(&buff, im); err != nil {
-			log.Println("err = ", err)
-			return "", "", errors.New("No new file")
-		}
-		log.Println("GetImage d")
+		png.Encode(&buff, im)
 		return i.Name, "data:image/png;base64," + base64.StdEncoding.EncodeToString(buff.Bytes()), nil
 	}
 	return "", "", errors.New("No new file")
 }
 
-// AddImage puts an image to private s3 store
 func (sss *PrivateS3ImageProvider) AddImage(name, url string) {
 	var b []byte
 
@@ -117,108 +96,109 @@ func (sss *PrivateS3ImageProvider) AddImage(name, url string) {
 
 func (sss *PrivateS3ImageProvider) fetch(svc *s3.S3) {
 	buck := &s3.ListObjectsV2Input{}
-	//buck := &s3.ListObjectsInput{}
 	buck.SetBucket(sss.bucket)
 	buck.SetPrefix(sss.prefix + "/")
 	buck.SetDelimiter("/")
 
-	sss.listThat(svc, buck)
+	sss.listThat(svc, buck, requiredSamples)
 }
 
-func (sss *PrivateS3ImageProvider) listThat(svc *s3.S3, buck *s3.ListObjectsV2Input) {
-	//func (sss *PrivateS3ImageProvider) listThat(svc *s3.S3, buck *s3.ListObjectsInput) {
-	prefixes := []string{}
-	log.Println("privates3imageprovider listThat")
-	walkFn := func(page *s3.ListObjectsV2Output, lastPage bool) bool {
-		for _, obj := range page.Contents {
-			if obj.Key == nil {
-				continue
-			}
-			fmt.Println("key:", *obj.Key)
+func (sss *PrivateS3ImageProvider) fetchBranches(svc *s3.S3) {
+	buck := &s3.ListObjectsV2Input{}
+	buck.SetBucket(sss.bucket)
+	buck.SetPrefix("/")
+	buck.SetDelimiter("")
+
+	sss.findLastBranch(svc, buck)
+}
+
+func (sss *PrivateS3ImageProvider) findLastBranch(svc *s3.S3, buck *s3.ListObjectsV2Input) {
+	p := "/"
+	b := &s3.ListObjectsV2Input{}
+	b.SetBucket(*buck.Bucket)
+	b.SetPrefix(p)
+	//b.SetDelimiter("/")
+
+	page := 0
+	err := svc.ListObjectsV2Pages(b, func(p *s3.ListObjectsV2Output, lastPage bool) bool {
+		page++
+		for _, cc := range p.Contents {
+			fmt.Println("CC => ", *cc.Key)
 
 			in := s3.GetObjectInput{
 				Bucket: buck.Bucket,
-				Key:    obj.Key,
+				Key:    cc.Key,
+			}
+			res, err := svc.GetObject(&in)
+			fmt.Println("res=>", res)
+			if err != nil {
+				return false
+			}
+		}
+		return true
+	})
+	if err != nil {
+		fmt.Println("err=>", err)
+
+	}
+}
+
+func (sss *PrivateS3ImageProvider) listThat(svc *s3.S3, buck *s3.ListObjectsV2Input, qtt int) {
+	//fabio
+	//count := 0
+
+	prefixes := []string{}
+	page := 0
+	err := svc.ListObjectsV2Pages(buck, func(p *s3.ListObjectsV2Output, lastPage bool) bool {
+		page++
+		for _, cc := range p.Contents {
+			fmt.Println("CC => ", cc.Key)
+			isImage := false
+			for _, ext := range []string{".jpg", ".jpeg", ".png"} {
+				k := strings.ToLower(*cc.Key)
+				if strings.HasSuffix(k, ext) {
+					isImage = true
+				}
+			}
+
+			if !isImage {
+				continue
+			}
+
+			in := s3.GetObjectInput{
+				Bucket: buck.Bucket,
+				Key:    cc.Key,
 			}
 			res, err := svc.GetObject(&in)
 			if err != nil {
-				log.Println("Private S3 ERR 1", err)
-				continue
+				log.Println("S3 ERR 1", err)
 			}
 
 			// AddImage...
 			sss.hit <- &s3res{
-				Name:   *obj.Key,
+				Name:   *cc.Key,
 				Reader: res.Body,
 			}
-			for _, cp := range page.CommonPrefixes {
-				prefixes = append(prefixes, *cp.Prefix)
-			}
 		}
-		return false
+		for _, cp := range p.CommonPrefixes {
+			prefixes = append(prefixes, *cp.Prefix)
+		}
+		return lastPage
+	})
+	if err != nil {
+		log.Println("S3 failed", err)
 	}
-	listObjectsInput := &s3.ListObjectsV2Input{
-		MaxKeys: aws.Int64(10),
-		Bucket:  buck.Bucket,
-	}
-	svc.ListObjectsV2Pages(listObjectsInput, walkFn)
+
+	//TODO: there is a weak point here.
+	//      if prefixes are not informed during project
+	//      creation or the prefixes return an empty set
+	//      GetImage will be hanging because sss.listThat
+	//      is responsible for sending content to <-sss.hit
 	for _, p := range prefixes {
 		b := &s3.ListObjectsV2Input{}
 		b.SetBucket(*buck.Bucket)
 		b.SetPrefix(p)
 		b.SetDelimiter("/")
-		sss.listThat(svc, b)
+		sss.listThat(svc, b, requiredSamples)
 	}
-	/*
-		prefixes := []string{}
-		page := 0
-			err := svc.ListObjectsV2Pages(buck, func(p *s3.ListObjectsV2Output, lastPage bool) bool {
-				//err := svc.ListObjectsPages(buck, func(p *s3.ListObjectsOutput, lastPage bool) bool {
-				page++
-				for _, cc := range p.Contents {
-					isImage := false
-					for _, ext := range []string{".jpg", ".jpeg", ".png"} {
-						k := strings.ToLower(*cc.Key)
-						if strings.HasSuffix(k, ext) {
-							isImage = true
-						}
-					}
-					log.Println("privates3imageprovider listThat, cc %v", cc)
-					log.Println("privates3imageprovider listThat, isImage %v", isImage)
-					if !isImage {
-						continue
-					}
-
-					in := s3.GetObjectInput{
-						Bucket: buck.Bucket,
-						Key:    cc.Key,
-					}
-					res, err := svc.GetObject(&in)
-					if err != nil {
-						log.Println("Private S3 ERR 1", err)
-					}
-
-					// AddImage...
-					sss.hit <- &s3res{
-						Name:   *cc.Key,
-						Reader: res.Body,
-					}
-				}
-				for _, cp := range p.CommonPrefixes {
-					prefixes = append(prefixes, *cp.Prefix)
-				}
-				return lastPage
-			})
-			if err != nil {
-				log.Println("Private S3 failed", err)
-			}
-			for _, p := range prefixes {
-				b := &s3.ListObjectsV2Input{}
-				//b := &s3.ListObjectsInput{}
-				b.SetBucket(*buck.Bucket)
-				b.SetPrefix(p)
-				b.SetDelimiter("/")
-				sss.listThat(svc, b)
-			}
-	*/
 }

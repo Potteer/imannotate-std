@@ -25,20 +25,22 @@
 
         <div class="form-group">
           <label for="tags">Applicable tags for annotation</label>
-          <input class="form-control" required type="text" placeholder="Coma separated list of classes to annotate"
-            (keyup)="onTagChange()" [(ngModel)]="tags" name="tags" />
+          <input class="form-control" required type="text" placeholder="Comma separated list of classes to annotate"
+            (keyup)="onTagChange()" (focuschange)="onTagChange()" [(ngModel)]="tags" name="tags" />
         </div>
+
         <div class="form-group">
           <label for="description">Description text</label>
-          <textarea class="form-control" required placeholder="Type a description about the project" [(ngModel)]="project.description"
+          <textarea class="form-control" value="default value" placeholder="Type a description about the project" [(ngModel)]="project.description"
             name="description"></textarea>
         </div>
 
         <div class="form-group">
           <label for="imageProvider">Choose an image provider that will fetch image to annotate</label>
           <select (change)="onProviderChange()" name="imageProvider" class="form-control" [(ngModel)]="project.imageProvider">
-            <option value="scality">S3 Interno</option>
-            <option value="s3">S3 Amazon</option>
+
+            <option value="scality">Private S3</option>
+            <option value="s3">Amazon S3</option>
             <option value="qwant">Qwant image search</option>
           </select>
         </div>
@@ -72,34 +74,44 @@
 
         <!-- start scality -->
         <div class="form-group" name="fs-options" *ngIf="project.imageProvider == 'scality'">
-          <label for="id">Your scality address</label>
-          <input type="text" class="form-control" name="server" [(ngModel)]="project.imageProviderOptions.server" (keyup)="checkScalityCredentials()"
+          <label for="id">Your Private S3 address</label>
+          <input type="text" class="form-control" name="server" [(ngModel)]="project.imageProviderOptions.server"
             required />
 
-          <label for="id">Your scality ID</label>
-          <input type="text" class="form-control" name="id" [(ngModel)]="project.imageProviderOptions.id" (keyup)="checkScalityCredentials()"
+          <label for="id">ID</label>
+          <input type="text" class="form-control" name="id" [(ngModel)]="project.imageProviderOptions.id"
             required />
 
-          <label for="secret">Scality Secret</label>
+          <label for="secret">Secret</label>
           <input type="password" class="form-control" name="secret" [(ngModel)]="project.imageProviderOptions.secret"
-            (keyup)="checkScalityCredentials()" required />
+            required />
 
-          <label for="region">Scality Region</label>
-          <input type="text" class="form-control" name="region" value="us-east-1" [(ngModel)]="project.imageProviderOptions.region"
-            (keyup)="checkScalityCredentials()" />
+          <label for="region">Region</label>
+          <input type="text" class="form-control" name="region" required [(ngModel)]="project.imageProviderOptions.region" 
+          />
+
+
+          <div>
+          <button type="button" class="btn-success" (click)="checkScalityCredentials()">Check Credentials</button>
+          </div>
+
+          <div class="alert alert-danger" *ngIf="!scalityValid && project.imageProvider != ''">
+            Authentication problem:
+            {{ scalityError }}
+          </div>
 
           <label for="bucket">Bucket name</label>
-          <select [(ngModel)]="project.imageProviderOptions.bucket" name="bucket" class="form-control">
+          <select [(ngModel)]="project.imageProviderOptions.bucket" name="bucket" class="form-control" required>
             <option *ngFor="let b of bucketList" value="{{b.Name}}" type="option">{{ b.Name }}</option>
           </select>
 
           <label for="prefix">Prefix in that bucket</label>
-          <input type="text" class="form-control" name="prefix" [(ngModel)]="project.imageProviderOptions.prefix"
-            required />
-
-            <div style="margin-top: 10px;" class="alert alert-danger" *ngIf="!scalityValid">
-              Scality authentication problem: {{ scalityError }}
-            </div>
+<<<<<<< HEAD
+          <input type="text" class="form-control" name="prefix" [(ngModel)]="project.imageProviderOptions.prefix"/>
+=======
+          <input type="text" class="form-control" name="prefix" required [(ngModel)]="project.imageProviderOptions.prefix"
+          />
+>>>>>>> s3private-dev
         </div>
         <!-- end scality -->
 

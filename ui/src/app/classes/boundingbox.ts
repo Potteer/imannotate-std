@@ -10,7 +10,6 @@ export class BoundingBox {
     old_color: string;
     textColor: string;
     hasAlpha: boolean;
-    path: Path2D;
 
     constructor(x, y, w, h) {
         this.x = x;

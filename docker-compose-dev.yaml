@@ -15,8 +15,8 @@ services:
   api:
     build: containers/api
     volumes:
-        - ./app:/go/src/github.com/smileinnovation/imannotate/app:Z
-        - ./api:/go/src/github.com/smileinnovation/imannotate/api:Z
+       - ./app:/go/src/github.com/smileinnovation/imannotate/app:Z
+       - ./api:/go/src/github.com/smileinnovation/imannotate/api:Z
 
     user: ${_UID}:${_GID}
 
@@ -42,7 +42,7 @@ services:
       MINIO_SECRET_KEY: verySecretKey1
       S3DATAPATH: /data/
       S3METADATAPATH: /metadata/
-    command: server  /data
+    command: server /data
     volumes:
         - /tmp/s3data:/data
         - /tmp/s3metadata:/metadata
@@ -55,6 +55,19 @@ services:
       MONGO_INITDB_ROOT_USERNAME: mongouser
       MONGO_INITDB_ROOT_PASSWORD: mongopwd
     privileged: true
+
+    #ME_CONFIG_MONGODB_SERVER: database
+  mongoexpress:
+    image: mongo-express
+    ports:
+        - 9999:8081
+    environment:
+      ME_CONFIG_MONGODB_SERVER: imannotate_database_1 
+      ME_CONFIG_MONGODB_PORT: 27017
+      ME_CONFIG_MONGODB_ADMINUSERNAME: mongouser 
+      ME_CONFIG_MONGODB_ADMINPASSWORD: mongopwd
+    depends_on:
+      - database
 
   http:
     image: nginx:alpine

@@ -18,7 +18,8 @@ func GetProvider(prj *project.Project) providers.ImageProvider {
 		log.Println("No image provider defined")
 		return nil
 	}
-	if p, ok := imageProviders[prj.Id]; !ok {
+	p, ok := imageProviders[prj.Id]
+	if !ok {
 		createImageProvider(prj)
 		return GetProvider(prj)
 	} else {
@@ -44,12 +45,6 @@ func createImageProvider(prj *project.Project) {
 		provider := s3store.NewS3ImageProvider(opt["id"], opt["secret"], opt["region"], opt["bucket"], opt["prefix"])
 		imageProviders[prj.Id] = provider
 	case "scality":
-		log.Println("create image provider")
-		log.Println("id: " + string(opt["id"]))
-		log.Println("secret: " + string(opt["secret"]))
-		log.Println("server: " + string(opt["server"]))
-		log.Println("region: " + string(opt["region"]))
-		log.Println("bucket: " + string(opt["bucket"]))
 		provider := privates3store.NewS3ImageProvider(opt["server"], opt["id"], opt["secret"], opt["region"], opt["bucket"], opt["prefix"])
 		imageProviders[prj.Id] = provider
 	}
