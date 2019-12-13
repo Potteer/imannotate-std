@@ -45,7 +45,7 @@ export class ThemeService {
   setTheme() {
     let theme = localStorage.getItem("theme");
     if (!theme) {
-      theme = "lux";
+      theme = "Darkly";
     }
 
     const link = document.createElement("link");

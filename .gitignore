@@ -18,8 +18,6 @@ ui/.node-gyp
 # to use local environment with goswitch for example
 bin
 bin/*
-src
-src/*
 pkg
 pkg/*
 

@@ -19,7 +19,7 @@ export class AnnotatorComponent implements OnInit {
   currentBox: BoundingBox;
   boxes = new Array<BoundingBox>();
   project = new Project();
-  image: ImageResult ;
+  image: ImageResult;
 
   constructor(
     private route: ActivatedRoute,

@@ -28,9 +28,11 @@ import { AdminUserComponent } from '@app/components/admin/admin-user/admin-user.
 import { UserComponent } from '@app/components/user/user.component';
 import { TruncatePipe } from '@app/pipe/truncate.pipe';
 import { HammerConfig } from '@app/classes/hammer-config';
+import { NgbdCarouselPause } from '@app/components/carousel/carousel.component';
 
 @NgModule({
   declarations: [
+    NgbdCarouselPause,
     AppComponent,
     SignupComponent,
     SigninComponent,
@@ -70,6 +72,8 @@ import { HammerConfig } from '@app/classes/hammer-config';
     ProjectService,
     AdminService,
   ],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent,
+    NgbdCarouselPause]
 })
 export class AppModule { }
+export class NgbdCarouselPauseModule {}
