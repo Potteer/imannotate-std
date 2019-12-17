@@ -189,7 +189,6 @@ export class ProjectformComponent implements OnInit {
     );
   }
 
-
   setBanner(event) {
     let reader = new FileReader();
 

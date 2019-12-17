@@ -1,24 +1,27 @@
 <ngb-carousel #carousel interval="500" [pauseOnHover]="pauseOnHover" (slide)="onSlide($event)">
     <ng-template ngbSlide *ngFor="let img of images; index as i">
-        <div class="carousel-caption">
-            <h3 style="color: white;">Imagem {{i + 1}}</h3>
-        </div>
-        <!-- <a href="https://www.google.fr/?q=Number+{{i+1}}" target="_blank" rel="nofollow noopener noreferrer"> -->
+      <div class="carousel-caption">
+        <h3 style="color: white;">Imagem {{i + 1}}</h3>
+      </div>
+      <!--<a href="https://www.google.fr/?q=Number+{{i+1}}" target="_blank" rel="nofollow noopener noreferrer">-->
         <div class="picsum-img-wrapper">
-            <img [src="img" alt="My image {{i + 1}} description">
+          <img [src]="img" alt="Imagem {{i + 1}}">
         </div>
-        <!-- </a> -->
+      <!--</a>-->
     </ng-template>
-</ngb-carousel>
-      
-<hr>
-
-<div class="row justify-content-md-center text-center">
-<div class="form-check">
+  </ngb-carousel>
+  
+  <hr>
+  
+<div class="row justify-content-center text-center">
+  <div class="form-check">
     <input type="checkbox" class="form-check-input" id="pauseOnHover" [(ngModel)]="pauseOnHover">
-    <label style="margin-right: 10px;" class="form-check-label" for="pauseOnHover">Pausar ao aproximar mouse</label>
-</div>
-<button type="button" (click)="togglePaused()" class="p-2 btn btn-warning">
+    <label class="form-check-label" for="pauseOnHover">Pausar ao manter o cursor na imagem</label>
+  </div></div>
+<div style="margin-top: 10px;" class="row justify-content-center text-center">
+  <button type="button" (click)="togglePaused()" class="p-2 btn btn-warning">
     {{paused ? 'Iniciar' : 'Pausar' }}
-</button>
+  </button>
 </div>
+
+  

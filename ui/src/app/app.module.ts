@@ -57,6 +57,7 @@ import { NgbdCarouselPause } from '@app/components/carousel/carousel.component';
     NgbModule.forRoot(),
     BrowserAnimationsModule,
   ],
+  exports: [NgbdCarouselPause],
   providers: [
     {
       provide: HTTP_INTERCEPTORS,
@@ -77,3 +78,4 @@ import { NgbdCarouselPause } from '@app/components/carousel/carousel.component';
 })
 export class AppModule { }
 export class NgbdCarouselPauseModule {}
+

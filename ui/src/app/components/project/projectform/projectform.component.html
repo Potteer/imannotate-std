@@ -2,7 +2,7 @@
   <div class="row justify-content-md-center">
     <div class="col col-md-6">
       <h1 innerHTML="{{ title }}"></h1>
-      <div class="alert alert-success" *ngIf="projectWasSaved">Project successfuly saved</div>
+      <div style="text-align: center;" class="alert alert-success" *ngIf="projectWasSaved">Project successfuly saved</div>
       <form #f="ngForm" (submit)="create()">
         <div class="form-group">
           <label for="name">Project name</label>
@@ -86,16 +86,20 @@
             required />
 
           <label for="region">Region</label>
-          <input type="text" class="form-control" name="region" required [(ngModel)]="project.imageProviderOptions.region" 
+          <input type="text" placeholder="Default: Santander" class="form-control" name="region" required [(ngModel)]="project.imageProviderOptions.region" 
           />
 
-          <div>
-          <button type="button" class="btn-success" (click)="checkScalityCredentials()">Check Credentials</button>
+          <div class="row justify-content-center text-center">
+          <button style="margin-top: 10px; margin-bottom: 10px;" type="button" class="btn btn-success" (click)="checkScalityCredentials()">Check Credentials</button>
           </div>
 
-          <div class="alert alert-danger" *ngIf="!scalityValid && project.imageProvider != ''">
+          <div style="text-align: center;" class="alert alert-danger" *ngIf="!scalityValid && project.imageProvider != ''">
             Authentication problem:
             {{ scalityError }}
+          </div>
+
+          <div style="text-align: center;" class="alert alert-success" *ngIf="scalityValid">
+            Authentication successfuly. Now, select your bucket name:
           </div>
 
           <label for="bucket">Bucket name</label>
@@ -116,7 +120,9 @@
         </div>
 
         <div class="form-group">
-          <button class="btn btn-success" type="submit" [disabled]="f.status == 'INVALID' || !formIsValid()">Save</button>
+          <div class="row justify-content-center text-center">
+            <button class="btn btn-success" type="submit" [disabled]="f.status == 'INVALID' || !formIsValid()">Save</button>
+          </div>
         </div>
       </form>
 
@@ -127,13 +133,16 @@
       <div *ngIf="edit">
         <p>You may propose to other to annotate the project with you</p>
         <input type="text" class="form-control" [(ngModel)]="contribSearch" [inputFormatter]="searchFormatter"
-          [resultTemplate]="rt" [ngbTypeahead]="searchContributor" /><button class="btn btn-success" (click)="addContributor()">add</button>
+          [resultTemplate]="rt" [ngbTypeahead]="searchContributor" />
+          <div class="row justify-content-center text-center">
+            <button style="margin-top: 10px; margin-bottom: 10px;" class="btn btn-success" (click)="addContributor()">Add contributors</button>
+          </div>
         <span *ngIf="searching"><i class="material-icons rotating" style="float: right; margin-top: -2.2rem; margin-right: 1rem;">refresh</i></span>
-        <ngb-alert [type]="alertType" [dismissible]="false" (close)="successMessage = null" *ngIf="successMessage">
+        <ngb-alert style="text-align: center;" [type]="alertType" [dismissible]="false" (close)="successMessage = null" *ngIf="successMessage">
           {{ successMessage }}
         </ngb-alert>
         <ul>
-          <li *ngFor="let c of contributors">{{ c.username }} <button class="btn btn-danger material-icons" (click)="removeContributor(c)">delete</button></li>
+          <li style="margin-left: 10px;"*ngFor="let c of contributors">{{ c.username }} <button class="btn btn-danger material-icons" (click)="removeContributor(c)">delete</button></li>
         </ul>
       </div>
 

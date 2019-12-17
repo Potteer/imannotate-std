@@ -5,8 +5,8 @@
       <div class="mt-2">
         <h2><img class="gravatar mr-2 rounded-circle" [src]="gravatar" />{{ user.username }}</h2>
       </div>
-      <div class="alert alert-success" *ngIf="saved">
-        user saved !
+      <div style="text-align: center;" class="alert alert-success" *ngIf="saved">
+        User {{ user.username }} saved !
       </div>
       <div class="alert alert-error" *ngIf="error != ''">
         {{ error }}
@@ -24,7 +24,9 @@
           <label for="name">Password - leave blank to not change the current one</label>
           <input type="password" name="password" [(ngModel)]="user.password" class="form-control" />
         </div>
-        <button type="submit" class="btn btn-success">Save</button>
+        <div class="row justify-content-center text-center">
+          <button style="margin-bottom: 10px;" type="submit" class="btn btn-success">Save</button>
+        </div>  
       </form>
       <div>
         <p>You may choose a theme</p>
