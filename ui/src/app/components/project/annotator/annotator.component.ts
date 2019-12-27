@@ -1,13 +1,13 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ProjectService } from '@app/services/project.service';
 import { Project } from '@app/classes/project';
 import { Annotator } from '@app/classes/annotator';
-import { BoundingBox } from '@app/classes/boundingbox';
 import { Annotation } from '@app/classes/annotation';
 import { ImageResult } from "@app/classes/imageresult";
+import { UserService } from '@app/services/user.service';
+import { User } from '@app/classes/user';
 
-import {NgbModal, ModalDismissReasons} from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   selector: 'app-annotator',
@@ -17,16 +17,19 @@ import {NgbModal, ModalDismissReasons} from '@ng-bootstrap/ng-bootstrap';
 
 export class AnnotatorComponent implements OnInit {
   annotator: Annotator;
-  currentBox: BoundingBox;
-  boxes = new Array<BoundingBox>();
+  annotation: Annotation;
   project = new Project();
   image: ImageResult;
+  label;
+  boxes = new Array();
+  public user: User;
+
 
   constructor(
     private route: ActivatedRoute,
     private projectService: ProjectService,
-    private modalService: NgbModal,
-  ) { }
+    private userservice: UserService,
+  ) { this.user = new User();}
 
   ngOnInit() {
     this.route.params.subscribe(param => {
@@ -36,68 +39,43 @@ export class AnnotatorComponent implements OnInit {
         this.annotator = new Annotator('#annotator');
 
         this.annotator.boxes.subscribe(box => {
-          this.currentBox = box;
+          this.boxes = box;
         });
-
-        this.annotator.removeBox.subscribe(box => {
-          const index: number = this.boxes.indexOf(box);
-          if (index !== -1) {
-            this.boxes.splice(index, 1);
-          }
-          this.annotator.setBoundingBoxes(this.boxes);
-        });
-
         this.nextImage();
       });
     });
   }
 
   setLabel(label: string) {
-    if (!this.currentBox) { return; }
-    if ((this.currentBox.width - this.currentBox.x) * this.annotator.canvas.clientWidth < 20 ||
-        (this.currentBox.height - this.currentBox.y) * this.annotator.canvas.clientHeight < 20
-    ) {
-      alert("Box too small !")
-      return
-    }
-
-    this.currentBox.label = label;
-    this.boxes.push(this.currentBox);
-    this.annotator.setBoundingBoxes(this.boxes);
-    this.currentBox = null;
+    label = label;
+    console.log("Antes: ", label)
   }
 
-
   saveAnnotation() {
-    console.log(this.boxes);
     const annotation = new Annotation();
     annotation.image = this.image.name;
-    annotation.boxes = this.boxes;
-    console.log(annotation);
+    annotation.username = this.userservice.currentUser.username;
+    annotation.label = this.label;
+    annotation.timestamp = Math.round(new Date().getTime()/1000) - Math.round(new Date().getTimezoneOffset() * 60 );
     this.projectService.saveAnnotation(this.project, annotation).subscribe(ann => {
       console.log("saved:", ann);
+      console.log("label:", annotation.label);
+      console.log("user:", annotation.username);
+      console.log("Timestamp:", annotation.timestamp);
       this.nextImage();
     });
   }
 
-  saveEmptyAnnotation(content) {
-    this.modalService.open(content, {}).result.then(
-      result => {
-        console.log("result", result);
-      },
-      reason => {
-        console.log("reason", reason);
-      }
-    );
-  }
+  //JUntar tudo no boxes e mandar o boxes
 
   nextImage() {
     // TODO: send box to server before to get next image
     this.projectService.getNextImage().subscribe(image => {
-      console.log(image)
+      console.log("Next Image: ",image)
       this.image = image;
-      this.boxes = new Array<BoundingBox>();
-      this.annotator.loadImage(image.url);
+      //this.annotator.loadImage(image.url);
     });
   }
 }
+
+

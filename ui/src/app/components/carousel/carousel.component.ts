@@ -24,6 +24,7 @@ export class NgbdCarouselConfig {
     if (this.paused) {
       this.carousel.cycle();
       this.carousel.interval = 500;
+      this.carousel.next();
     } else {
       this.carousel.pause();
       this.carousel.interval = 0;

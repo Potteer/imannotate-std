@@ -62,7 +62,7 @@ services:
     ports:
         - 9999:8081
     environment:
-      ME_CONFIG_MONGODB_SERVER: imannotate-std_database_1 
+      ME_CONFIG_MONGODB_SERVER: imannotatestd_database_1 
       ME_CONFIG_MONGODB_PORT: 27017
       ME_CONFIG_MONGODB_ADMINUSERNAME: mongouser 
       ME_CONFIG_MONGODB_ADMINPASSWORD: mongopwd

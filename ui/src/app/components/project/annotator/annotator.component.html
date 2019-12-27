@@ -12,14 +12,12 @@
           <p>Actions:</p>
           <button style="margin-right: 10px; margin-bottom: 10px;" class="p-2 btn btn-success"
             (click)="saveAnnotation()"
-            [disabled]="boxes.length == 0"
             ngbTooltip="Salvar anotação e solicitar novas imagens">Próxima</button>
           <!-- <button class="p-2 btn btn-danger"
             (click)="saveEmptyAnnotation(content)"
             [disabled]="boxes.length > 0"
             ngbTooltip="If there are no annotation found on that image">Nothing !</button> -->
           <button style="margin-right: 10px; margin-bottom: 10px;" class="p-2 btn btn-warning"
-            [disabled]="boxes.length > 0"
             (click)="nextImage()"
             ngbTooltip="Estou com dúvida. Passar ao nível 2 de curadoria">Dúvida</button>
         </div>
@@ -36,6 +34,7 @@
 </div>
 
 
+<!-- 
 <ng-template #content let-c="close" let-d="dismiss">
   <div class="modal-header">
     <h4 class="modal-title" id="modal-basic-title">Empty annotation</h4>
@@ -51,4 +50,4 @@
   <div class="modal-footer">
     <button type="button" class="btn btn-outline-dark" (click)="c('yes')">Yes</button>
   </div>
-</ng-template>
+</ng-template>-->

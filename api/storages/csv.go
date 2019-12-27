@@ -47,7 +47,7 @@ func (csv *CSVStorage) Save(ano *annotation.Annotation) error {
 	lines := []string{}
 
 	if len(ano.Boxes) == 0 {
-		lines = append(lines, ano.Image+",,,,,")
+		lines = append(lines, ano.Image+",,,")
 	}
 
 	for _, a := range ano.Boxes {
@@ -60,12 +60,10 @@ func (csv *CSVStorage) Save(ano *annotation.Annotation) error {
 			}
 		}
 
-		lines = append(lines, fmt.Sprintf("%s,%f,%f,%f,%f,%s",
+		lines = append(lines, fmt.Sprintf("%s,%s,%s,%s",
 			ano.Image,
-			a.X,
-			a.Y,
-			a.W,
-			a.H,
+			a.Timestamp,
+			a.Username,
 			a.Label))
 	}
 

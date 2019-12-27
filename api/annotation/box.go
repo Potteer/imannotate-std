@@ -8,11 +8,9 @@ type Annotation struct {
 }
 
 type Box struct {
-	Label string  `json:"label" bson:"label"`
-	X     float64 `json:"x" bson:"x"`
-	Y     float64 `json:"y" bson:"y"`
-	W     float64 `json:"width" bson:"w"`
-	H     float64 `json:"height" bson:"h"`
+	Label     string `json:"label" bson:"label"`
+	Username  string `json:"username" bson:"username"`
+	Timestamp string `json:"timestamp" bson:"timestamp"`
 }
 
 type AnnotationStore interface {

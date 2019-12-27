@@ -17,7 +17,7 @@ func (c *CSV) Export(annotations []*annotation.Annotation) io.Reader {
 	for _, ann := range annotations {
 		im := ann.Image
 		for _, b := range ann.Boxes {
-			lines = append(lines, fmt.Sprintf("%s,%s,%f,%f,%f,%f", im, b.Label, b.X, b.Y, b.W, b.H))
+			lines = append(lines, fmt.Sprintf("%s,%s,%s,%s", im, b.Label, b.Username, b.Timestamp))
 		}
 	}
 
