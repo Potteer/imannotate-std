@@ -28,11 +28,11 @@ import { AdminUserComponent } from '@app/components/admin/admin-user/admin-user.
 import { UserComponent } from '@app/components/user/user.component';
 import { TruncatePipe } from '@app/pipe/truncate.pipe';
 import { HammerConfig } from '@app/classes/hammer-config';
-import { NgbdCarouselPause } from '@app/components/carousel/carousel.component';
+import { NgbdCarouselConfig } from './components/carousel/carousel.component';
+
 
 @NgModule({
   declarations: [
-    NgbdCarouselPause,
     AppComponent,
     SignupComponent,
     SigninComponent,
@@ -48,6 +48,7 @@ import { NgbdCarouselPause } from '@app/components/carousel/carousel.component';
     AdminUserComponent,
     UserComponent,
     TruncatePipe,
+    NgbdCarouselConfig,
   ],
   imports: [
     BrowserModule,
@@ -57,7 +58,7 @@ import { NgbdCarouselPause } from '@app/components/carousel/carousel.component';
     NgbModule.forRoot(),
     BrowserAnimationsModule,
   ],
-  exports: [NgbdCarouselPause],
+  exports:[],
   providers: [
     {
       provide: HTTP_INTERCEPTORS,
@@ -73,8 +74,7 @@ import { NgbdCarouselPause } from '@app/components/carousel/carousel.component';
     ProjectService,
     AdminService,
   ],
-  bootstrap: [AppComponent,
-    NgbdCarouselPause]
+  bootstrap: [AppComponent]
 })
 export class AppModule { }
 export class NgbdCarouselPauseModule {}

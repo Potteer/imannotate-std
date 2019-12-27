@@ -12,8 +12,9 @@ import {NgbModal, ModalDismissReasons} from '@ng-bootstrap/ng-bootstrap';
 @Component({
   selector: 'app-annotator',
   templateUrl: './annotator.component.html',
-  styleUrls: ['./annotator.component.css']
+  styleUrls: ['./annotator.component.css'],
 })
+
 export class AnnotatorComponent implements OnInit {
   annotator: Annotator;
   currentBox: BoundingBox;
